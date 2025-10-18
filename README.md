@@ -1,6 +1,6 @@
 # NinjaLAN Automation Suite
 
-NinjaLAN is a fully automated, self-healing network environment built around PowerShell, Hyper-V, and WireGuard. It prioritizes network adapters, enforces hardened security defaults, manages a Hyper‑V VM with snapshot logic, auto‑launches and monitors a WireGuard tunnel, generates a live dashboard, and runs 24/7 via scheduled health checks and recovery.
+NinjaLAN is a fully automated, self-healing network environment built around PowerShell, Hyper-V, and WireGuard. It prioritizes network adapters, enforces hardened security defaults, manages a Hyper-V VM, and provides a portable lab workflow for disk and VPN optimization.
 
 ## Features
 
@@ -63,6 +63,30 @@ NinjaLAN is a fully automated, self-healing network environment built around Pow
 - DNS & Routes
   - Defaults: `1.1.1.1`, `8.8.8.8`
   - Add/modify static routes within `NinjaLAN_Startup.ps1` if needed
+
+## Portable Lab Recommendations
+
+The following recommendations are intended for users running NinjaLAN as a portable lab on an external drive or when prioritizing VM responsiveness and portability.
+
+Maximize I/O Performance
+
+- Mandatory SSD: Only use an external Solid State Drive (SSD), preferably NVMe, for optimal VM responsiveness, especially with a disk-intensive OS like Windows Server.
+- Fixed-Size Disk: Create your Windows Server VM disk as a Fixed Size VDI file in VirtualBox to pre-allocate space and minimize dynamic resizing overhead.
+
+Ensure Portability
+
+- Store the VirtualBox installation folder (if possible via Portable VirtualBox) and all VM files (.vdi, .vbox, snapshots) on the external drive.
+- Always Shut Down or Save State the VMs before ejecting the drive to prevent disk corruption.
+
+Isolate and Secure the Lab
+
+- Use VirtualBox Host-Only Networks to create a completely isolated subnet.
+- Route all internal VM traffic through the OpenWrt VM (acting as the default gateway and DHCP server for the Host-Only network).
+- The OpenWrt VM's firewall rules and the WireGuard VPN provide the primary security barrier for the entire lab.
+
+Prioritize Fast Connectivity (WireGuard)
+
+- WireGuard's modern, lightweight protocol ensures the fastest possible VPN performance for accessing your portable lab remotely, superior to older protocols like OpenVPN.
 
 ## Scheduling (Installed Automatically)
 
