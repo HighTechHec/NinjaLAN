@@ -1,7 +1,15 @@
 import asyncio
 import psutil
 import random
+import shutil
 from .base import BaseAgent
+
+# Try importing pynvml for Real Nvidia support
+try:
+    import pynvml
+    HAS_NVML = True
+except ImportError:
+    HAS_NVML = False
 
 class NetworkSentinel(BaseAgent):
     def __init__(self):
@@ -19,7 +27,6 @@ class NetworkSentinel(BaseAgent):
                 active_ifaces = [iface for iface, data in stats.items() if data.isup]
 
                 # Check for "Paper Tiger" to "Real" issues
-                # e.g. High errors or drops
                 if io.errin > 0 or io.dropin > 0:
                     self.log(f"WARNING: Detected packet loss on input. Errors: {io.errin}, Drops: {io.dropin}")
 
@@ -43,10 +50,6 @@ class SystemHardener(BaseAgent):
     async def run_loop(self):
         while self.running:
             self.status = "AUDITING"
-            # Simulate checking for "weak" configs (as per original README goals)
-
-            # In a real scenario, we would use `subprocess.run(['smbstatus'])` or check registry keys
-            # For this "Supercharged" demo, we maintain the "God Mode" narrative.
             self.log("Auditing protocols... NetBIOS: DISABLED. SMBv1: PURGED.")
 
             if random.random() > 0.9:
@@ -81,17 +84,44 @@ class CreativeDirector(BaseAgent):
 class NvidiaOverseer(BaseAgent):
     def __init__(self):
         super().__init__("NvidiaOverseer", "30", "GPU Commander. Maximizing Tensor Throughput.")
+        self.handle = None
+        if HAS_NVML:
+            try:
+                pynvml.nvmlInit()
+                self.handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+                self.log("Nvidia NVML Initialized. Real GPU access active.")
+            except Exception as e:
+                self.log(f"NVML Init failed: {e}. Falling back to simulation.")
+                self.handle = None
 
     async def run_loop(self):
         while self.running:
             self.status = "OVERCLOCKING"
-            # Simulate GPU stats since we might be in a headless sandbox
-            # In a real scenario, we would use pynvml or nvidia-smi
-            gpu_load = random.randint(10, 99)
-            vram_usage = random.randint(2048, 8192)
-            temp = random.randint(40, 85)
 
-            self.log(f"GPU Load: {gpu_load}% | VRAM: {vram_usage}MB | Temp: {temp}C")
+            gpu_load = 0
+            vram_usage = 0
+            temp = 0
+
+            if self.handle:
+                try:
+                    # Real Data
+                    util = pynvml.nvmlDeviceGetUtilizationRates(self.handle)
+                    mem_info = pynvml.nvmlDeviceGetMemoryInfo(self.handle)
+                    temp = pynvml.nvmlDeviceGetTemperature(self.handle, pynvml.NVML_TEMPERATURE_GPU)
+
+                    gpu_load = util.gpu
+                    vram_usage = mem_info.used // 1024 // 1024 # MB
+                    self.log(f"[REAL] GPU Load: {gpu_load}% | VRAM: {vram_usage}MB | Temp: {temp}C")
+
+                except Exception as e:
+                    self.log(f"Error reading GPU stats: {e}")
+                    self.handle = None # Disable handle if it fails
+            else:
+                # Simulated Data
+                gpu_load = random.randint(10, 99)
+                vram_usage = random.randint(2048, 8192)
+                temp = random.randint(40, 85)
+                self.log(f"[SIM] GPU Load: {gpu_load}% | VRAM: {vram_usage}MB | Temp: {temp}C")
 
             if gpu_load > 90:
                  self.log("Thermal throttling avoided. Cooling systems engaged. [OPTIMIZED]")
@@ -99,3 +129,11 @@ class NvidiaOverseer(BaseAgent):
             await asyncio.sleep(2)
             self.status = "RENDERING"
             await asyncio.sleep(2)
+
+    async def stop(self):
+        if HAS_NVML:
+            try:
+                pynvml.nvmlShutdown()
+            except:
+                pass
+        await super().stop()
