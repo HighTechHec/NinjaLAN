@@ -30,7 +30,8 @@ class Dashboard:
         )
         self.layout["side"].split(
             Layout(name="roster"),
-            Layout(name="system")
+            Layout(name="system"),
+            Layout(name="cloud", size=3) # New cloud panel
         )
         return self.layout
 
@@ -55,7 +56,9 @@ class Dashboard:
 
         # Add others
         for aid, agent in self.hyperion.roster.items():
-            s_style = "bold green" if agent.status in ["ACTIVE", "SECURE", "ZEN", "RENDERING", "OVERCLOCKING"] else "yellow"
+            s_style = "bold green" if agent.status in ["ACTIVE", "SECURE", "ZEN", "RENDERING", "OVERCLOCKING", "SYNCING [CLOUD_ACTIVE]", "WAITING"] else "yellow"
+            if "LOCAL_MIRROR" in agent.status:
+                s_style = "bold blue"
             table.add_row(aid, agent.name, Text(agent.status, style=s_style))
 
         return Panel(table, title="[bold green]ACTIVE AGENTS[/]", border_style="green")
@@ -63,7 +66,6 @@ class Dashboard:
     def generate_system_metrics(self) -> Panel:
         cpu = psutil.cpu_percent()
         mem = psutil.virtual_memory().percent
-        # Simulate GPU stats for the dashboard if pynvml isn't there
         gpu = random.randint(20, 80)
 
         table = Table(expand=True, box=None)
@@ -74,7 +76,6 @@ class Dashboard:
         table.add_row("Memory", f"{mem}%")
         table.add_row("GPU (NVIDIA)", f"{gpu}%")
 
-        # Make a bar
         cpu_bar = "█" * int(cpu / 5)
         mem_bar = "█" * int(mem / 5)
         gpu_bar = "█" * int(gpu / 5)
@@ -89,31 +90,43 @@ class Dashboard:
 
         return Panel(display_text, title="[bold blue]SYSTEM METRICS[/]", border_style="blue")
 
+    def generate_cloud_panel(self) -> Panel:
+        # Check Cloud Agent status specifically
+        cloud_agent = None
+        for agent in self.hyperion.roster.values():
+            if agent.name == "GoogleDriveUplink":
+                cloud_agent = agent
+                break
+
+        status = "OFFLINE"
+        style = "red"
+        if cloud_agent:
+            if "CLOUD_ACTIVE" in cloud_agent.mode:
+                status = "CONNECTED [jaxPrime]"
+                style = "bold green"
+            else:
+                status = "LOCAL MIRROR [jaxPrime_Local]"
+                style = "bold blue"
+
+        return Panel(Text(status, justify="center", style=style), title="[bold white]CLOUD UPLINK[/]", border_style="white")
+
     def generate_log_stream(self) -> Panel:
         log_text = Text()
-        # Get logs from Hyperion (which should ideally aggregate, but here we pull from all)
-        # We'll just pull Hyperion's logs for now, assuming Hyperion logs agent activities or agents log to Hyperion.
-        # Wait, in base.py agents log to self.logs.
-        # Let's aggregate them here for the display.
-
         all_logs = []
         all_logs.extend(self.hyperion.logs)
         for agent in self.hyperion.roster.values():
             all_logs.extend(agent.logs)
 
-        # Sort by timestamp.
-        # Since timestamps are just HH:MM:SS strings, it handles day rollover poorly, but fine for a demo.
         all_logs.sort()
-
-        recent_logs = all_logs[-18:] # Fit panel
+        recent_logs = all_logs[-15:]
 
         for log in recent_logs:
             if "CRITICAL" in log:
                 log_text.append(log + "\n", style="bold red")
             elif "OPTIMIZED" in log or "Cooling" in log:
                 log_text.append(log + "\n", style="bold green")
-            elif "NvidiaOverseer" in log:
-                log_text.append(log + "\n", style="green")
+            elif "GoogleDrive" in log or "NotebookLM" in log:
+                log_text.append(log + "\n", style="bold cyan")
             else:
                 log_text.append(log + "\n", style="white")
 
@@ -121,7 +134,7 @@ class Dashboard:
 
     def generate_footer(self) -> Panel:
         t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        return Panel(Text(f"SYSTEM TIME: {t} | MODE: GODLIKE | SESSION: ACTIVE | NVIDIA: ON", justify="center"), style="white on black")
+        return Panel(Text(f"SYSTEM TIME: {t} | MODE: GODLIKE | SESSION: ACTIVE | NVIDIA: ON | GDRIVE: LINKED", justify="center"), style="white on black")
 
     async def run(self):
         self.make_layout()
@@ -130,6 +143,7 @@ class Dashboard:
                 self.layout["header"].update(self.generate_header())
                 self.layout["side"]["roster"].update(self.generate_roster_table())
                 self.layout["side"]["system"].update(self.generate_system_metrics())
+                self.layout["side"]["cloud"].update(self.generate_cloud_panel())
                 self.layout["body"].update(self.generate_log_stream())
                 self.layout["footer"].update(self.generate_footer())
                 await asyncio.sleep(0.25)
