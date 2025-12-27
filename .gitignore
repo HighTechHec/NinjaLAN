@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.log
+second_brain_briefing.md
+omni_core/data/*
+!omni_core/data/.gitkeep
