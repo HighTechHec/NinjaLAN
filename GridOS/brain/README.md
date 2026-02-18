@@ -7,9 +7,10 @@
 *Semantic Memory • GPU Acceleration • Knowledge Graphs • Chain-of-Thought Reasoning*
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104-green.svg)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109.1-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Security](https://img.shields.io/badge/security-patched-brightgreen.svg)](https://github.com/advisories)
 
 </div>
 
@@ -511,6 +512,32 @@ black .
 # Type checking
 mypy .
 ```
+
+---
+
+## 🔒 Security
+
+### Vulnerability Management
+
+This project maintains up-to-date dependencies to address known security vulnerabilities.
+
+**Recent Security Updates:**
+- **FastAPI 0.109.1** - Patched ReDoS vulnerability in Content-Type header parsing (CVE-2024-24762)
+- All dependencies regularly updated for security patches
+
+### Reporting Security Issues
+
+If you discover a security vulnerability, please report it via GitHub Security Advisories or contact the maintainers directly.
+
+### Security Best Practices
+
+When deploying Second Brain:
+- ✅ Use environment variables for sensitive configuration
+- ✅ Enable authentication on Neo4j, Redis, and other services
+- ✅ Run services in isolated Docker networks
+- ✅ Keep all dependencies up to date
+- ✅ Review Docker Compose security settings
+- ✅ Use HTTPS/TLS for production deployments
 
 ---
 
