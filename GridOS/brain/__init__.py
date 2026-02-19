@@ -1,14 +1,20 @@
 """
-NVIDIA Second Brain - ULTIMATE Edition
-Complete AI-powered knowledge management system with all advanced features
+NVIDIA Second Brain - HYBRID Edition
+Complete AI-powered knowledge management system with NVIDIA + Google Cloud
 
-Production-grade second brain with NVIDIA stack + Enterprise Features.
+Production-grade second brain leveraging:
+- NVIDIA: GPU acceleration, local inference, real-time processing
+- Google Cloud: Cloud storage, Gemini AI, Keep/Drive sync
 
 Components:
 - core: Multi-tier memory system + knowledge graph
 - nvidia_inference: NVIDIA NIM + TensorRT integration
+- nvidia_nemo: Advanced NLP with NeMo
+- nvidia_rapids: GPU-accelerated data processing
 - vector_db: Milvus GPU-accelerated vector database
 - reasoning: 3-stage retrieval + chain-of-thought reasoning
+- google_cloud: Keep, Drive, Gemini, Firebase integration
+- hybrid_orchestrator: Intelligent routing between NVIDIA & Google
 - auth: JWT authentication + RBAC + API keys
 - advanced: Webhooks, auto-tagging, analytics, recommendations
 - ultimate: Insights, multi-agent reasoning, temporal reasoning, semantic cache
@@ -17,21 +23,39 @@ Components:
 - server_ultimate: REST API with 40+ endpoints
 
 Usage:
-    from brain import SecondBrain
+    from brain import HybridBrain
     
-    brain = SecondBrain()
+    brain = HybridBrain()
     brain.ingest("Your knowledge here")
     results = brain.retrieve("search query")
 """
 
-__version__ = "2.0.0"
-__edition__ = "ULTIMATE"
+__version__ = "3.0.0"
+__edition__ = "HYBRID"
 __author__ = "NVIDIA Second Brain Team"
 
 from .core import SecondBrain, MemoryStore, KnowledgeGraph, MemoryNode
 from .nvidia_inference import NVIDIAInferenceEngine, InferenceConfig
 from .vector_db import MilvusVectorDB, VectorConfig
 from .reasoning import RetrievalPipeline, ReasoningEngine, RetrievalResult
+
+# NVIDIA Advanced Features
+try:
+    from .nvidia_nemo import NeMoNLPEngine, IntentType, SentimentType
+    from .nvidia_rapids import RAPIDSDataProcessor, RAPIDSGraphProcessor
+    
+    NVIDIA_ADVANCED_AVAILABLE = True
+except ImportError:
+    NVIDIA_ADVANCED_AVAILABLE = False
+
+# Google Cloud Features
+try:
+    from .google_cloud import GoogleCloudManager, CloudConfig, SyncStatus
+    from .hybrid_orchestrator import HybridOrchestrator, HybridConfig, ProcessingMode
+    
+    GOOGLE_CLOUD_AVAILABLE = True
+except ImportError:
+    GOOGLE_CLOUD_AVAILABLE = False
 
 # Ultimate Edition Features
 try:
@@ -66,6 +90,27 @@ __all__ = [
     "RetrievalResult",
 ]
 
+# Add NVIDIA advanced features if available
+if NVIDIA_ADVANCED_AVAILABLE:
+    __all__.extend([
+        "NeMoNLPEngine",
+        "IntentType",
+        "SentimentType",
+        "RAPIDSDataProcessor",
+        "RAPIDSGraphProcessor",
+    ])
+
+# Add Google Cloud features if available
+if GOOGLE_CLOUD_AVAILABLE:
+    __all__.extend([
+        "GoogleCloudManager",
+        "CloudConfig",
+        "SyncStatus",
+        "HybridOrchestrator",
+        "HybridConfig",
+        "ProcessingMode",
+    ])
+
 # Add ultimate features if available
 if ULTIMATE_FEATURES_AVAILABLE:
     __all__.extend([
@@ -91,9 +136,23 @@ def get_version():
     return {
         'version': __version__,
         'edition': __edition__,
+        'nvidia_advanced': NVIDIA_ADVANCED_AVAILABLE,
+        'google_cloud': GOOGLE_CLOUD_AVAILABLE,
         'ultimate_features': ULTIMATE_FEATURES_AVAILABLE,
         'features': {
             'core': True,
+            # NVIDIA
+            'nvidia_nim': True,
+            'nvidia_nemo': NVIDIA_ADVANCED_AVAILABLE,
+            'nvidia_rapids': NVIDIA_ADVANCED_AVAILABLE,
+            'tensorrt': True,
+            # Google Cloud
+            'google_keep': GOOGLE_CLOUD_AVAILABLE,
+            'google_drive': GOOGLE_CLOUD_AVAILABLE,
+            'google_gemini': GOOGLE_CLOUD_AVAILABLE,
+            'firebase': GOOGLE_CLOUD_AVAILABLE,
+            'hybrid_orchestrator': GOOGLE_CLOUD_AVAILABLE,
+            # Ultimate
             'authentication': ULTIMATE_FEATURES_AVAILABLE,
             'webhooks': ULTIMATE_FEATURES_AVAILABLE,
             'analytics': ULTIMATE_FEATURES_AVAILABLE,
@@ -116,41 +175,49 @@ def print_banner():
     banner = f"""
 ╔══════════════════════════════════════════════════════════════════╗
 ║                                                                  ║
-║           🧠 NVIDIA SECOND BRAIN - {__edition__:^10} 🚀              ║
+║           🧠 SECOND BRAIN - {__edition__:^10} EDITION 🚀              ║
 ║                                                                  ║
-║        AI-Powered Knowledge Management System                    ║
+║        NVIDIA GPU + Google Cloud AI Platform                     ║
 ║                   Version {__version__}                                ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Core Features:
-✓ Multi-tier Memory System (Ebbinghaus, Spaced Repetition)
+NVIDIA Stack:
 ✓ NVIDIA NIM + TensorRT Inference
 ✓ GPU-Accelerated Vector Search (Milvus)
-✓ Knowledge Graph (Neo4j)
-✓ Chain-of-Thought Reasoning
+✓ NVIDIA NeMo for Advanced NLP
+✓ NVIDIA RAPIDS for Data Processing
+✓ Multi-tier Memory System
+✓ Knowledge Graph Analytics
+"""
+    
+    if GOOGLE_CLOUD_AVAILABLE:
+        banner += """
+Google Cloud Integration:
+✓ Google Keep - Rapid Capture
+✓ Google Drive - Structured Storage
+✓ Google Gemini (Vertex AI) - Advanced Reasoning
+✓ Firebase/Firestore - Cloud Sync
+✓ Hybrid Orchestrator - Intelligent Routing
 """
     
     if ULTIMATE_FEATURES_AVAILABLE:
         banner += """
-Advanced Features:
+Enterprise Features:
 ✓ JWT Authentication & RBAC
 ✓ Webhook Notifications
-✓ Auto-Tagging & NLP
 ✓ Insight Generation
 ✓ Multi-Agent Reasoning
 ✓ Temporal Reasoning
 ✓ Semantic Caching
-✓ Domain Fine-Tuning
-✓ Collaborative Knowledge Graph
 ✓ 3D Visualization Dashboard
-✓ Browser Extension Integration
-✓ Obsidian Vault Sync
+✓ Browser Extension
+✓ Obsidian Sync
 ✓ Mobile API
 ✓ Analytics & Monitoring
 """
     
-    banner += "\nReady for Production! 🎉\n"
+    banner += "\n🎉 Best of Both Worlds: NVIDIA + Google Cloud! 🎉\n"
     print(banner)
 
 
