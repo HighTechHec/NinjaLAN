@@ -1,0 +1,37 @@
+# Secrets and configs
+*.conf
+*.key
+*.pem
+*.pfx
+*.p12
+*.ovpn
+*.kdbx
+*.asc
+*.cer
+*.crt
+
+# Logs and local artifacts
+Logs/
+*.log
+*.evtx
+
+# WireGuard dumps/exports
+WireGuard*.zip
+wg*.txt
+
+# PowerShell local overrides
+*.secrets.ps1
+*.local.ps1
+
+# Hyper-V VM artifacts (just in case)
+*.vhd
+*.vhdx
+*.avhd
+*.avhdx
+*.vmcx
+*.vmrs
+
+# OS/IDE clutter
+.DS_Store
+Thumbs.db
+.vscode/
